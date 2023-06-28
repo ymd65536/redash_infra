@@ -1,0 +1,2 @@
+# redash_infra
+redashのインフラをCloudFormationでコード化する
