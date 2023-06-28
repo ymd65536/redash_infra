@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPC and Subnet Create
+
+Parameters:
+  PJPrefix:
+    Type: String
+    Default: dev
+
+  DevNetworkCidr:
+    Type: String
+    Default: "10.0.0.0/16"
+
+Resources:
+  DevNetwork:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Ref DevNetworkCidr
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-redash"
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-igw"
+
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref DevNetwork
+Outputs:
+  VpcNetwork:
+    Value: !Ref DevNetwork
+    Export:
+      Name: !Sub "${PJPrefix}-network"
+  Igw:
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub "${PJPrefix}-igw"

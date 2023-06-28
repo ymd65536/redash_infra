@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Route
+
+Parameters:
+  PJPrefix:
+    Type: String
+    Default: dev
+
+Resources:
+  FargateRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-route"
+
+  FargateRoute: 
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref FargateRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Sub
+        - "${IGW}"
+        - IGW: {'Fn::ImportValue' : !Sub '${PJPrefix}-igw'}
+
+  FargateRouteTableAssociationA: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Sub 
+        - "${SubnetId}"
+        - SubnetId: {'Fn::ImportValue' : !Sub '${PJPrefix}-fargate-subnet-1a'}
+      RouteTableId: !Ref FargateRouteTable
+
+  FargateRouteTableAssociationC: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Sub 
+        - "${SubnetId}"
+        - SubnetId: {'Fn::ImportValue' : !Sub '${PJPrefix}-fargate-subnet-1c'}
+      RouteTableId: !Ref FargateRouteTable
+
+Outputs:
+  ExFargateRouteTable:
+    Value: !Ref FargateRouteTable
+    Export:
+      Name: "FargateRouteTableId"

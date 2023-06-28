@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPC and Subnet Create
+
+Parameters:
+  PJPrefix:
+    Type: String
+    Default: dev
+
+  PublicFargateA:
+    Type: String
+    Default: "10.0.2.0/24"
+
+  PublicFargateC:
+    Type: String
+    Default: "10.0.3.0/24"
+
+  PrivateRdsSubnetA:
+    Type: String
+    Default: "10.0.4.0/24"
+
+  PrivateRdsSubnetC:
+    Type: String
+    Default: "10.0.5.0/24"
+
+  PrivateRedisA:
+    Type: String
+    Default: "10.0.6.0/24"
+
+  PrivateRedisC:
+    Type: String
+    Default: "10.0.7.0/24"
+
+Resources:
+  PublicFargateSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PublicFargateA
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-subnet-a"
+
+  PublicFargateSubnetC:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PublicFargateC
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-subnet-1c"
+
+  RdsSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PrivateRdsSubnetA
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-rds-subnet-1a"
+  RdsSubnetC:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PrivateRdsSubnetC
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-rds-subnet-1c"
+
+  PrivateRedisSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PrivateRedisA
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-redis-subnet-1a"
+
+  PrivateRedisSubnetC:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PrivateRedisC
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+      Tags:
+        - Key: Name
+          Value: !Sub "${PJPrefix}-redis-subnet-1c"
+Outputs:
+  ExFargatePublicSubnetA:
+    Value: !Ref PublicFargateSubnetA
+    Export:
+      Name: !Sub "${PJPrefix}-fargate-subnet-1a"
+  ExFargatePublicSubnetC:
+    Value: !Ref PublicFargateSubnetC
+    Export:
+      Name: !Sub "${PJPrefix}-fargate-subnet-1c"
+  ExRdsSubnetA:
+    Value: !Ref RdsSubnetA
+    Export:
+      Name: !Sub "${PJPrefix}-rds-subnet-1a"
+  ExRdsSubnetC:
+    Value: !Ref RdsSubnetC
+    Export:
+      Name: !Sub "${PJPrefix}-rds-subnet-1c"
+  ExRedisSubnetA:
+    Value: !Ref PrivateRedisSubnetA
+    Export:
+      Name: !Sub "${PJPrefix}-redis-subnet-1a"
+  ExRedisSubnetC:
+    Value: !Ref PrivateRedisSubnetC
+    Export:
+      Name: !Sub "${PJPrefix}-redis-subnet-1c"

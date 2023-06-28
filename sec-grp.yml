@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPC and Subnet Create
+
+Parameters:
+  PJPrefix:
+    Type: String
+    Default: dev
+
+Resources:
+  PublicFargateSecGrp:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Redash Fargate
+      GroupName: !Sub "${PJPrefix}-fargate-sec-grp"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: 210.227.234.114/32
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-sec"
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+
+  PrivateRdsSecGrp:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: dev rds network
+      GroupName: !Sub "${PJPrefix}-rds-sec-grp"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.0.2.0/24
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.0.3.0/24
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-rds-sec-grp"
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+
+  PrivateRedisSecGrp:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Redash Fargate
+      GroupName: !Sub "${PJPrefix}-redis-sec-grp"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIp: 10.0.2.0/24
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIp: 10.0.3.0/24
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-redis-sec-grp"
+      VpcId: !Sub 
+        - "${NetworkName}"
+        - NetworkName : {'Fn::ImportValue': !Sub '${PJPrefix}-network'}
+
+Outputs:
+  ExPublicFargateSecGrp:
+    Value: !Ref PublicFargateSecGrp
+    Export:
+      Name: !Sub "${PJPrefix}-fargate-sec-grp"
+  ExPrivateRdsSecGrp:
+    Value: !Ref PrivateRdsSecGrp
+    Export:
+      Name: !Sub "${PJPrefix}-rds-sec-grp"
+  ExPrivateRedisSecGrp:
+    Value: !Ref PrivateRedisSecGrp
+    Export:
+      Name: !Sub "${PJPrefix}-redis-sec-grp"
