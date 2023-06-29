@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  CacheEngine:
+    Type: String
+    Default: redis
+  
+  CacheEngineVersion:
+    Type: String
+    Default: 7.0
+  
+  ClusterNodeType:
+    Type: String
+    Default: cache.t2.micro
+
+  CacheNodeType:
+    Type: String
+    Default: cache.t2.micro
+    
+  CacheParameterGroupName:
+    Type: String
+    Default: default.redis3.2
+
+  PJPrefix:
+    Type: String
+    Default: dev
+    
+  RedisPort:
+    Type: Number
+    Default: 6379
+    
+  ReplicaCount:
+    Type: Number
+    Default: 1
+
+
+Resources:
+  SubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      CacheSubnetGroupName: !Sub "${PJPrefix}-subnetgroup"
+      Description: !Sub "${PJPrefix}-SubnetGroup"
+      SubnetIds:
+        - { "Fn::ImportValue": !Sub "${PJPrefix}-redis-subnet-1a" }
+        - { "Fn::ImportValue": !Sub "${PJPrefix}-redis-subnet-1c" }
+  RedisCluster:
+    Type: 'AWS::ElastiCache::CacheCluster'
+    Properties:
+      CacheNodeType: !Ref ClusterNodeType
+      CacheSubnetGroupName: !Ref SubnetGroup
+      ClusterName: !Sub ${PJPrefix}-redis-cluster
+      Engine: !Ref CacheEngine
+      EngineVersion: !Ref CacheEngineVersion
+      NumCacheNodes: 1
+      Port: !Ref RedisPort
+      PreferredMaintenanceWindow: 'sun:01:00-sun:02:00'
+      VpcSecurityGroupIds:
+        - { "Fn::ImportValue": !Sub "${PJPrefix}-redis-sec-grp" }
+Outputs:
+  CacheReaderEndPointAddress:
+    Value: !GetAtt RedisCluster.RedisEndpoint.Address
+    Export:
+      Name: ExCacheReaderEndPointAddress
+  CacheReaderEndPointPort:
+    Value: !GetAtt RedisCluster.RedisEndpoint.Port
+    Export:
+      Name: ExCacheReaderEndPointPort
